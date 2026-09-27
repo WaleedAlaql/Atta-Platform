@@ -20,21 +20,6 @@ public class DonationRequestController {
         return ResponseEntity.ok(donationRequestService.getAllRequests());
     }
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<?> getRequestsByStatus(@PathVariable String status) {
-        var requests = donationRequestService.getRequestsByStatus(status);
-        if (requests == null) {
-            return ResponseEntity.status(400).body(new ApiResponse(
-                    "Invalid status. Use CREATED, IN_PROGRESS, or DELIVERED"));
-        }
-        return ResponseEntity.ok(requests);
-    }
-
-    @GetMapping("/count")
-    public ResponseEntity<Long> countRequests() {
-        return ResponseEntity.ok(donationRequestService.countRequests());
-    }
-
     @PostMapping("/add")
     public ResponseEntity<?> addRequest(@Valid @RequestBody DonationRequest request) {
         String result = donationRequestService.addRequest(request);
@@ -74,5 +59,20 @@ public class DonationRequestController {
             return ResponseEntity.badRequest().body("Request not found or already completed");
         }
         return ResponseEntity.ok("Request status updated successfully to the next stage and notification sent.");
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<?> getRequestsByStatus(@PathVariable String status) {
+        var requests = donationRequestService.getRequestsByStatus(status);
+        if (requests == null) {
+            return ResponseEntity.status(400).body(new ApiResponse(
+                    "Invalid status. Use CREATED, IN_PROGRESS, or DELIVERED"));
+        }
+        return ResponseEntity.ok(requests);
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> countRequests() {
+        return ResponseEntity.ok(donationRequestService.countRequests());
     }
 }

@@ -20,11 +20,6 @@ public class BeneficiaryController {
         return ResponseEntity.ok(beneficiaryService.getAllBeneficiaries());
     }
 
-    @GetMapping("/unverified")
-    public ResponseEntity<?> getUnverifiedBeneficiaries() {
-        return ResponseEntity.ok(beneficiaryService.getUnverifiedBeneficiaries());
-    }
-
     @PostMapping("/add")
     public ResponseEntity<?> addBeneficiary(@Valid @RequestBody Beneficiary beneficiary, Errors errors) {
         if (errors.hasErrors()) {
@@ -53,5 +48,10 @@ public class BeneficiaryController {
             return ResponseEntity.badRequest().body("Beneficiary not found");
         }
         return ResponseEntity.ok("Beneficiary deleted successfully");
+    }
+
+    @GetMapping("/unverified")
+    public ResponseEntity<?> getUnverifiedBeneficiaries() {
+        return ResponseEntity.ok(beneficiaryService.getUnverifiedBeneficiaries());
     }
 }

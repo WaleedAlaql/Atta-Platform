@@ -17,11 +17,6 @@ public class BadgeController {
         return ResponseEntity.ok(badgeService.getAllBadges());
     }
 
-    @GetMapping("/donor/{donorId}")
-    public ResponseEntity<?> getBadgesByDonor(@PathVariable Integer donorId) {
-        return ResponseEntity.ok(badgeService.getBadgesByDonor(donorId));
-    }
-
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteBadge(@PathVariable Integer id) {
         boolean deleted = badgeService.deleteBadge(id);
@@ -29,5 +24,10 @@ public class BadgeController {
             return ResponseEntity.badRequest().body("Badge not found");
         }
         return ResponseEntity.ok("Badge deleted successfully");
+    }
+
+    @GetMapping("/donor/{donorId}")
+    public ResponseEntity<?> getBadgesByDonor(@PathVariable Integer donorId) {
+        return ResponseEntity.ok(badgeService.getBadgesByDonor(donorId));
     }
 }

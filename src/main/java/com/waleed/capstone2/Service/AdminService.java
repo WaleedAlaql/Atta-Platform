@@ -82,17 +82,10 @@ public class AdminService {
         return "Beneficiary verified successfully";
     }
 
-    // give a badge to a donor
-    public boolean giveBadgeToDonor(Integer donorId, String badgeTitle) {
-        if (!donorRepository.existsById(donorId)) {
-            return false; // donor not found
+    public boolean giveBadge(Badge badge) {
+        if (badge == null || badge.getDonorId() == null || !donorRepository.existsById(badge.getDonorId())) {
+            return false;
         }
-
-        Badge badge = new Badge();
-        badge.setDonorId(donorId);
-
-        badge.setTitle(badgeTitle);
-
         badgeRepository.save(badge);
         return true;
     }

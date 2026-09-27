@@ -31,7 +31,6 @@ public class DonationItemController {
             return ResponseEntity.status(404).body(new ApiResponse("Donor not found with the given ID"));
         }
 
-        // if the item is added successfully
         return ResponseEntity.status(200).body(new ApiResponse("Item added successfully with direct phone contact"));
     }
 

@@ -22,13 +22,6 @@ public class DonationItemService {
         return donationItemRepository.findAll();
     }
 
-    public DonationItem findById(Integer id) {
-        if (id == null) {
-            return null;
-        }
-        return donationItemRepository.findById(id).orElse(null);
-    }
-
     public String addItem(DonationItem item) {
         // check if the donor is in the system
         Donor donor = donorRepository.findById(item.getDonorId()).orElse(null);
@@ -68,6 +61,13 @@ public class DonationItemService {
         }
         donationItemRepository.delete(device);
         return true;
+    }
+
+    public DonationItem findById(Integer id) {
+        if (id == null) {
+            return null;
+        }
+        return donationItemRepository.findById(id).orElse(null);
     }
 
     public List<DonationItem> getByCategory(String category) {

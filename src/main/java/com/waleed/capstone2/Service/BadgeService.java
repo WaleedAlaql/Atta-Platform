@@ -16,15 +16,15 @@ public class BadgeService {
         return badgeRepository.findAll();
     }
 
-    public List<Badge> getBadgesByDonor(Integer donorId) {
-        return badgeRepository.findByDonorId(donorId);
-    }
-
     public boolean deleteBadge(Integer id) {
         if (!badgeRepository.existsById(id)) {
             return false;
         }
         badgeRepository.deleteById(id);
         return true;
+    }
+
+    public List<Badge> getBadgesByDonor(Integer donorId) {
+        return badgeRepository.findByDonorId(donorId);
     }
 }

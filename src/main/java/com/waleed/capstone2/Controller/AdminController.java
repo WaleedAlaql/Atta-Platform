@@ -71,13 +71,15 @@ public class AdminController {
         return ResponseEntity.ok(result);
     }
 
-    // give a badge to a donor
-    @PostMapping("/give-badge/{donorId}/{badgeTitle}")
-    public ResponseEntity<?> giveBadgeToDonor(@PathVariable Integer donorId, @PathVariable String badgeTitle) {
-        boolean added = adminService.giveBadgeToDonor(donorId, badgeTitle);
+    @PostMapping("/give-badge")
+    public ResponseEntity<?> giveBadge(@Valid @RequestBody Badge badge, Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(errors.getFieldError().getDefaultMessage());
+        }
+        boolean added = adminService.giveBadge(badge);
         if (!added) {
             return ResponseEntity.badRequest().body("Donor not found");
         }
-        return ResponseEntity.ok("Badge '" + badgeTitle + "' awarded to donor successfully");
+        return ResponseEntity.ok("Badge '" + badge.getTitle() + "' awarded to donor successfully");
     }
 }

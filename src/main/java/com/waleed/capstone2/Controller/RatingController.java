@@ -22,6 +22,27 @@ public class RatingController {
         return ResponseEntity.ok(ratingService.getAllRatings());
     }
 
+    @PostMapping("/add")
+    public ResponseEntity<?> addRating(@Valid @RequestBody Rating rating, Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(errors.getFieldError().getDefaultMessage());
+        }
+        boolean added = ratingService.addRating(rating);
+        if (!added) {
+            return ResponseEntity.badRequest().body("Donor or Beneficiary not found");
+        }
+        return ResponseEntity.ok("Rating added successfully");
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteRating(@PathVariable Integer id) {
+        boolean deleted = ratingService.deleteRating(id);
+        if (!deleted) {
+            return ResponseEntity.badRequest().body("Rating not found");
+        }
+        return ResponseEntity.ok("Rating deleted successfully");
+    }
+
     @GetMapping("/donor/{donorId}")
     public ResponseEntity<?> getRatingsByDonor(@PathVariable Integer donorId) {
         return ResponseEntity.ok(ratingService.getRatingsByDonor(donorId));
@@ -42,26 +63,5 @@ public class RatingController {
         double averageScore = Math.round(average * 10.0) / 10.0;
         String message = "Donor " + donorId + " has " + count + " ratings with average score " + averageScore;
         return ResponseEntity.ok(new ApiResponse(message));
-    }
-
-    @PostMapping("/add")
-    public ResponseEntity<?> addRating(@Valid @RequestBody Rating rating, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors.getFieldError().getDefaultMessage());
-        }
-        boolean added = ratingService.addRating(rating);
-        if (!added) {
-            return ResponseEntity.badRequest().body("Donor or Beneficiary not found");
-        }
-        return ResponseEntity.ok("Rating added successfully");
-    }
-
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteRating(@PathVariable Integer id) {
-        boolean deleted = ratingService.deleteRating(id);
-        if (!deleted) {
-            return ResponseEntity.badRequest().body("Rating not found");
-        }
-        return ResponseEntity.ok("Rating deleted successfully");
     }
 }

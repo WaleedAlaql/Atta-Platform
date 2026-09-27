@@ -24,30 +24,6 @@ public class DonationRequestService {
         return donationRequestRepository.findAll();
     }
 
-    public List<DonationRequest> getRequestsByStatus(String status) {
-        if (status == null || status.isBlank()) {
-            return null;
-        }
-        String normalized = status.trim();
-        if (!normalized.equalsIgnoreCase("CREATED")
-                && !normalized.equalsIgnoreCase("IN_PROGRESS")
-                && !normalized.equalsIgnoreCase("DELIVERED")) {
-            return null;
-        }
-        return donationRequestRepository.findByStatusIgnoreCase(normalized);
-    }
-
-    public long countRequests() {
-        return donationRequestRepository.count();
-    }
-
-    public DonationRequest findById(Integer id) {
-        if (id == null) {
-            return null;
-        }
-        return donationRequestRepository.findById(id).orElse(null);
-    }
-
     public String addRequest(DonationRequest request) {
         // check if the item is in the system
         DonationItem item = donationItemRepository.findById(request.getItemId()).orElse(null);
@@ -66,6 +42,7 @@ public class DonationRequestService {
             return "Beneficiary account is not verified by admin yet";
         }
 
+        // check if the beneficiary has already requested this item
         if (donationRequestRepository.existsByBeneficiaryIdAndItemId(
                 request.getBeneficiaryId(), request.getItemId())) {
             return "Already requested";
@@ -108,9 +85,13 @@ public class DonationRequestService {
             donationRequestRepository.save(request);
 
             // get the beneficiary's information and send a whatsapp message with the new status
+            DonationItem item = donationItemRepository.findById(request.getItemId()).orElse(null);
+            if (item == null) {
+                return false;
+            }
             Beneficiary beneficiary = beneficiaryRepository.findById(request.getBeneficiaryId()).orElse(null);
             if (beneficiary != null && beneficiary.getPhone() != null) {
-                String message = "Hello " + beneficiary.getName() + ", your donation request status has been updated to: *" + nextStatus + "*.";
+                String message = "Hello " + beneficiary.getName() + ", your donation request for item: (" + item.getTitle() + ") status has been updated to: *" + nextStatus + "*.";
                 whatsAppService.sendWhatsAppMessage(beneficiary.getPhone(), message);
             }
 
@@ -125,5 +106,29 @@ public class DonationRequestService {
 
         donationRequestRepository.deleteById(id);
         return true;
+    }
+
+    public List<DonationRequest> getRequestsByStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+        String normalized = status.trim();
+        if (!normalized.equalsIgnoreCase("CREATED")
+                && !normalized.equalsIgnoreCase("IN_PROGRESS")
+                && !normalized.equalsIgnoreCase("DELIVERED")) {
+            return null;
+        }
+        return donationRequestRepository.findByStatusIgnoreCase(normalized);
+    }
+
+    public long countRequests() {
+        return donationRequestRepository.count();
+    }
+
+    public DonationRequest findById(Integer id) {
+        if (id == null) {
+            return null;
+        }
+        return donationRequestRepository.findById(id).orElse(null);
     }
 }

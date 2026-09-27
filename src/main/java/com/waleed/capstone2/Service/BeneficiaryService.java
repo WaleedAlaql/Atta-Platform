@@ -16,10 +16,6 @@ public class BeneficiaryService {
         return beneficiaryRepository.findAll();
     }
 
-    public List<Beneficiary> getUnverifiedBeneficiaries() {
-        return beneficiaryRepository.findByIsVerifiedFalse();
-    }
-
     public void addBeneficiary(Beneficiary beneficiary) {
         beneficiary.setVerified(false); // the beneficiary starts as unverified until the admin verifies it
         beneficiaryRepository.save(beneficiary);
@@ -45,5 +41,9 @@ public class BeneficiaryService {
         }
         beneficiaryRepository.deleteById(id);
         return true;
+    }
+
+    public List<Beneficiary> getUnverifiedBeneficiaries() {
+        return beneficiaryRepository.findByIsVerifiedFalse();
     }
 }
