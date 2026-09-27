@@ -20,6 +20,21 @@ public class DonationRequestController {
         return ResponseEntity.ok(donationRequestService.getAllRequests());
     }
 
+    @GetMapping("/status/{status}")
+    public ResponseEntity<?> getRequestsByStatus(@PathVariable String status) {
+        var requests = donationRequestService.getRequestsByStatus(status);
+        if (requests == null) {
+            return ResponseEntity.status(400).body(new ApiResponse(
+                    "Invalid status. Use CREATED, IN_PROGRESS, or DELIVERED"));
+        }
+        return ResponseEntity.ok(requests);
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> countRequests() {
+        return ResponseEntity.ok(donationRequestService.countRequests());
+    }
+
     @PostMapping("/add")
     public ResponseEntity<?> addRequest(@Valid @RequestBody DonationRequest request) {
         String result = donationRequestService.addRequest(request);
@@ -32,6 +47,12 @@ public class DonationRequestController {
         }
         if (result.equals("Beneficiary account is not verified by admin yet")) {
             return ResponseEntity.status(400).body(new ApiResponse("Beneficiary account is not verified by admin yet"));
+        }
+        if (result.equals("Already requested")) {
+            return ResponseEntity.status(409).body(new ApiResponse("You already have a request for this item"));
+        }
+        if (!result.equals("Success")) {
+            return ResponseEntity.status(400).body(new ApiResponse(result));
         }
 
         return ResponseEntity.status(200).body(new ApiResponse("Donation request created successfully and WhatsApp notification sent"));

@@ -67,4 +67,13 @@ public class DonationItemController {
     public ResponseEntity<Map<String, Object>> getStats() {
         return ResponseEntity.status(200).body(donationItemService.getPlatformStats());
     }
+
+    @GetMapping("/donor/{donorId}")
+    public ResponseEntity<?> getItemsByDonor(@PathVariable Integer donorId) {
+        var items = donationItemService.getByDonorId(donorId);
+        if (items == null) {
+            return ResponseEntity.status(404).body(new ApiResponse("Donor not found"));
+        }
+        return ResponseEntity.ok(items);
+    }
 }

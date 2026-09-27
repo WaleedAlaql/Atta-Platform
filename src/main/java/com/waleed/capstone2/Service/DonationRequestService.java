@@ -24,6 +24,30 @@ public class DonationRequestService {
         return donationRequestRepository.findAll();
     }
 
+    public List<DonationRequest> getRequestsByStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+        String normalized = status.trim();
+        if (!normalized.equalsIgnoreCase("CREATED")
+                && !normalized.equalsIgnoreCase("IN_PROGRESS")
+                && !normalized.equalsIgnoreCase("DELIVERED")) {
+            return null;
+        }
+        return donationRequestRepository.findByStatusIgnoreCase(normalized);
+    }
+
+    public long countRequests() {
+        return donationRequestRepository.count();
+    }
+
+    public DonationRequest findById(Integer id) {
+        if (id == null) {
+            return null;
+        }
+        return donationRequestRepository.findById(id).orElse(null);
+    }
+
     public String addRequest(DonationRequest request) {
         // check if the item is in the system
         DonationItem item = donationItemRepository.findById(request.getItemId()).orElse(null);
@@ -40,6 +64,11 @@ public class DonationRequestService {
         // check if the beneficiary is verified by the admin
         if (!beneficiary.isVerified()) {
             return "Beneficiary account is not verified by admin yet";
+        }
+
+        if (donationRequestRepository.existsByBeneficiaryIdAndItemId(
+                request.getBeneficiaryId(), request.getItemId())) {
+            return "Already requested";
         }
 
         // set the request date and status

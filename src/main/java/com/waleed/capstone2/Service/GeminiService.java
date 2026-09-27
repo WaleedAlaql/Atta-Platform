@@ -11,7 +11,7 @@ import java.util.Map;
 @Service
 public class GeminiService {
 
-    private final String GEMINI_API_KEY = "AQ.Ab8RN6Kes1YFKL6KHt_RVpCS-SRsFlIbt5Uss1rIQar_c9fJ1w";
+    private final String GEMINI_API_KEY = "AQ.Ab8RN6JypbAl3LHV3RC2ffi1fjnAiog0p0qOtdcW-KU2ewFgEw";
 
     private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=" + GEMINI_API_KEY;
 
@@ -24,8 +24,9 @@ public class GeminiService {
     }
 
     public String generateAdDescription(String itemTitle, String itemCondition) {
-        String prompt = "Write a short, engaging, and professional marketing ad description for a donation item titled: " + itemTitle +
-                " with condition: " + itemCondition + " to encourage donors and beneficiaries. Answer in English.";
+        String prompt = "Write a short donation catalog description for an item titled: " + itemTitle +
+                " with condition: " + itemCondition +
+                ". Plain English, no markdown, no headline, maximum 900 characters.";
 
         return callGeminiApi(prompt);
     }

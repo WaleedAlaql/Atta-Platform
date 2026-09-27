@@ -23,7 +23,8 @@ public class DonationItem {
     private String title;
 
     @NotEmpty(message = "Description cannot be empty")
-    @Column(nullable = false, length = 500)
+    @Size(max = 1000, message = "Description must be at most 1000 characters")
+    @Column(nullable = false, length = 1000)
     private String description;
 
     @NotEmpty(message = "Category cannot be empty")

@@ -24,6 +24,10 @@ public class RatingService {
         return ratingRepository.findByDonorId(donorId);
     }
 
+    public boolean donorExists(Integer donorId) {
+        return donorId != null && donorRepository.existsById(donorId);
+    }
+
     public boolean addRating(Rating rating) {
         if (!donorRepository.existsById(rating.getDonorId()) || !beneficiaryRepository.existsById(rating.getBeneficiaryId())) {
             return false; // check if the donor and beneficiary are in the system

@@ -8,6 +8,7 @@ import java.util.List;
 @Repository
 public interface DonationRequestRepository extends JpaRepository<DonationRequest, Integer> {
 
-    // this method is used to find the donation requests for a specific beneficiary
-    List<DonationRequest> findByBeneficiaryId(Integer beneficiaryId);
+    List<DonationRequest> findByStatusIgnoreCase(String status);
+
+    boolean existsByBeneficiaryIdAndItemId(Integer beneficiaryId, Integer itemId);
 }

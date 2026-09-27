@@ -22,6 +22,13 @@ public class DonationItemService {
         return donationItemRepository.findAll();
     }
 
+    public DonationItem findById(Integer id) {
+        if (id == null) {
+            return null;
+        }
+        return donationItemRepository.findById(id).orElse(null);
+    }
+
     public String addItem(DonationItem item) {
         // check if the donor is in the system
         Donor donor = donorRepository.findById(item.getDonorId()).orElse(null);
@@ -69,6 +76,13 @@ public class DonationItemService {
 
     public List<DonationItem> getByLocation(String location) {
         return donationItemRepository.findByPickupLocationContainingIgnoreCase(location);
+    }
+
+    public List<DonationItem> getByDonorId(Integer donorId) {
+        if (donorId == null || !donorRepository.existsById(donorId)) {
+            return null;
+        }
+        return donationItemRepository.findByDonorId(donorId);
     }
 
     public Map<String, Object> getPlatformStats() {

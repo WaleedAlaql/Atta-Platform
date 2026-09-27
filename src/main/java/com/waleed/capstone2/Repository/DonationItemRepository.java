@@ -13,4 +13,5 @@ public interface DonationItemRepository extends JpaRepository<DonationItem, Inte
     // this method is used to find the devices that are available for pickup in a specific location
     List<DonationItem> findByPickupLocationContainingIgnoreCase(String pickupLocation);
 
+    List<DonationItem> findByDonorId(Integer donorId);
 }
