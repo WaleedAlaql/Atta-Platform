@@ -50,6 +50,10 @@ public class AdminService {
         return true;
     }
 
+    public List<Beneficiary> getUnverifiedBeneficiaries() {
+        return beneficiaryRepository.findByIsVerifiedFalse();
+    }
+
     // verify a beneficiary account
     public String verifyBeneficiary(Integer beneficiaryId) {
         Beneficiary beneficiary = beneficiaryRepository.findById(beneficiaryId).orElse(null);

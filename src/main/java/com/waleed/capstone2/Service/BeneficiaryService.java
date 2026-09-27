@@ -42,8 +42,4 @@ public class BeneficiaryService {
         beneficiaryRepository.deleteById(id);
         return true;
     }
-
-    public List<Beneficiary> getUnverifiedBeneficiaries() {
-        return beneficiaryRepository.findByIsVerifiedFalse();
-    }
 }

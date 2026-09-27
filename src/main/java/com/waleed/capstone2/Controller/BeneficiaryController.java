@@ -49,9 +49,4 @@ public class BeneficiaryController {
         }
         return ResponseEntity.ok("Beneficiary deleted successfully");
     }
-
-    @GetMapping("/unverified")
-    public ResponseEntity<?> getUnverifiedBeneficiaries() {
-        return ResponseEntity.ok(beneficiaryService.getUnverifiedBeneficiaries());
-    }
 }

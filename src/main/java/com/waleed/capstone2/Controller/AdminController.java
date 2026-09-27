@@ -52,6 +52,11 @@ public class AdminController {
         return ResponseEntity.ok("Admin deleted successfully");
     }
 
+    @GetMapping("/unverified")
+    public ResponseEntity<?> getUnverifiedBeneficiaries() {
+        return ResponseEntity.ok(adminService.getUnverifiedBeneficiaries());
+    }
+
     // verify a beneficiary account
     @PutMapping("/verify-beneficiary/{id}")
     public ResponseEntity<String> verifyBeneficiary(@PathVariable Integer id) {
