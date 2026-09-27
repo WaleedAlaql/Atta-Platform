@@ -1,47 +1,108 @@
-# Atta'a (عطاء) - Smart In-Kind Donation Platform
+# Atta'a (عطاء) - Donation Platform
 
 ---
 
 ## About the Project
-**Atta'a (عطاء)** is a comprehensive, secure, and intelligent platform designed to bridge the gap between donors and needy beneficiaries. Unlike traditional platforms restricted to single item types, Atta'a supports universal in-kind donations (books, clothes, electronics, and more). It features automated beneficiary verifications, real-time multi-channel notifications (WhatsApp & Email), and Gemini AI integration to assist donors and generate professional ad descriptions.
+
+**Atta'a (عطاء)** is a backend platform that connects **donors** and **beneficiaries** for donations (books, clothes, electronics, stationery, and more). Beneficiaries must be verified by admins before creating donation requests. Donors advance request status through the API workflow. The system sends **WhatsApp** updates on request lifecycle changes and **email** when an admin verifies a beneficiary account. **Gemini AI** exposes endpoints for donation advice and item description generation.
 
 ---
 
 ## Tech Stack & Architecture
-* **Language & Framework:** Java 17, Spring Boot 3
-* **Database & ORM:** MySQL, Spring Data JPA / Hibernate
-* **Third-Party Integrations:**
-  * **UltraMsg API:** Automated WhatsApp notifications with smart phone number formatting.
-  * **JavaMail (SMTP):** email notifications for account verification.
-  * **Gemini API:** AI consultant for item condition evaluation and automated marketing text generation.
+
+| Layer | Technology |
+|--------|------------|
+| Language & framework | Java 17, Spring Boot |
+| Database & ORM | MySQL, Spring Data JPA / Hibernate |
+| API | REST (`/api/v1/...`), JSON responses |
+| Validation | Jakarta Bean Validation on entities (`@Valid` on REST controllers) |
+
+**Third-party integrations**
+
+- **UltraMsg API** — WhatsApp notifications (request created / status updates).
+- **JavaMail (SMTP)** — Email when a beneficiary account is verified.
+- **Gemini API** — AI donation advice and item descriptions (`/api/v1/openai`).
+
+**Layered design**
+
+- **Controller** — REST resources and HTTP mapping.
+- **Service** — Business rules, notifications, AI calls.
+- **Repository** — Persistence via Spring Data JPA.
+- **Entity** — Domain model and validation constraints.
 
 ---
 
 ## Core Entities & System Design
-* **Donor:** Registers and lists in-kind items for community support.
-* **Beneficiary:** Submits claims and receives support after strict admin verification.
-* **Donation Item:** The universal item being donated, categorized by type, condition, and pickup location.
-* **Donation Request:** Tracks the lifecycle of an item claim (`CREATED` -> `IN_PROGRESS` -> `DELIVERED`).
-* **Admin, Badges & Ratings:** System control, donor gamification, and user feedback mechanisms.
+
+| Entity | Role |
+|--------|------|
+| **Donor** | Manages donor profiles; owns donation items. |
+| **Beneficiary** | Registers and requests items after admin verification. |
+| **Donation Item** | Donated item (category, condition, pickup location, donor contact). |
+| **Donation Request** | Claim lifecycle: `CREATED` → `IN_PROGRESS` → `DELIVERED`. |
+| **Admin** | System administrators; verify beneficiaries and award badges. |
+| **Badge & Rating** | Donor recognition and beneficiary feedback (1–5 stars). |
 
 ---
 
-## API Endpoints Overview (34 Endpoints)
-The platform is organized into 8 modular controllers:
+## REST API Overview (39 Endpoints)
 
-1. **Admin (`/api/v1/admin`)** - 6 Endpoints
-   * Manage system admins, verify beneficiary accounts, and award recognition badges.
-2. **Badge (`/api/v1/badge`)** - 3 Endpoints
-   * Retrieve and filter donor badges, or delete recognition records.
-3. **Beneficiary (`/api/v1/beneficiary`)** - 4 Endpoints
-   * Register and manage beneficiary profiles.
-4. **Donation Item (`/api/v1/device`)** - 7 Endpoints
-   * Manage items, filter by category/location.
-5. **Donation Request (`/api/v1/donation-request`)** - 4 Endpoints
-   * Create requests, track workflows, and update item statuses.
-6. **Donor (`/api/v1/donor`)** - 4 Endpoints
-   * Full CRUD operations for donor profiles.
-7. **Gemini AI (`/api/v1/openai`)** - 2 Endpoints
-   * AI-powered decision support (`/help-decision`) and automatic ad description generation (`/generate-ad`).
-8. **Rating (`/api/v1/rating`)** - 4 Endpoints
-   * Manage ratings between donors and beneficiaries.
+Eight `@RestController` modules under `/api/v1`:
+
+| # | Controller | Base path | Endpoints | Notes |
+|---|------------|-----------|-----------|--------|
+| 1 | Admin | `/api/v1/admin` | **6** | CRUD + verify beneficiary + award badge |
+| 2 | Badge | `/api/v1/badge` | **3** | List all, by donor, delete |
+| 3 | Beneficiary | `/api/v1/beneficiary` | **5** | CRUD + list unverified |
+| 4 | Donation Item | `/api/v1/device` | **8** | CRUD + filter category/location, stats, by donor |
+| 5 | Donation Request | `/api/v1/donation-request` | **6** | List / add / delete + status filter, count, workflow |
+| 6 | Donor | `/api/v1/donor` | **4** | Full CRUD |
+| 7 | Gemini AI | `/api/v1/openai` | **2** | Help decision + generate ad text |
+| 8 | Rating | `/api/v1/rating` | **5** | CRUD + by donor + average summary |
+
+**Totals:** **39** REST endpoints — **24** standard CRUD-style operations (`/get`, `/add`, `/update/{id}`, `/delete/{id}` where applicable) and **15** special operations (filters, counts, workflows, AI, admin actions).
+
+---
+
+### Special REST Endpoints (non-CRUD)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| PUT | `/api/v1/admin/verify-beneficiary/{id}` | Verify beneficiary account |
+| POST | `/api/v1/admin/give-badge/{donorId}/{badgeTitle}` | Award badge to donor |
+| GET | `/api/v1/badge/donor/{donorId}` | Badges for one donor |
+| GET | `/api/v1/beneficiary/unverified` | Pending verification queue |
+| GET | `/api/v1/device/category/{category}` | Items by category |
+| GET | `/api/v1/device/location/{location}` | Items by pickup location |
+| GET | `/api/v1/device/stats` | Platform donation item stats |
+| GET | `/api/v1/device/donor/{donorId}` | Donation items for one donor |
+| GET | `/api/v1/donation-request/status/{status}` | Requests by status (`CREATED`, `IN_PROGRESS`, `DELIVERED`) |
+| GET | `/api/v1/donation-request/count` | Total number of requests |
+| PUT | `/api/v1/donation-request/update-status/{id}` | Advance request to next stage |
+| GET | `/api/v1/rating/donor/{donorId}` | Ratings for one donor |
+| GET | `/api/v1/rating/donor/{donorId}/summary` | Average score and count for a donor |
+| GET | `/api/v1/openai/help-decision` | AI donation advice |
+| GET | `/api/v1/openai/generate-ad` | AI item description |
+
+---
+
+### Donation request workflow (API)
+
+1. **POST** `/api/v1/donation-request/add` — Beneficiary must be verified; duplicate requests for the same item are rejected; WhatsApp sent on success.
+2. **PUT** `/api/v1/donation-request/update-status/{id}` — Moves `CREATED` → `IN_PROGRESS` → `DELIVERED`; WhatsApp sent on each change.
+3. **DELETE** `/api/v1/donation-request/delete/{id}` — Removes a request.
+
+---
+
+## Project Structure (backend)
+
+```
+src/main/java/com/waleed/capstone2/
+  Controller/   REST API controllers
+  Entity/       JPA models + validation
+  Repository/   Spring Data JPA
+  Service/      Business logic, WhatsApp, email, Gemini
+  Api/          Shared API response types
+  Config/       Mail configuration
+```
+
