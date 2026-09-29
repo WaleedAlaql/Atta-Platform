@@ -1,5 +1,6 @@
 package com.waleed.capstone2.Service;
 
+import com.waleed.capstone2.Api.ApiException;
 import com.waleed.capstone2.Entity.Beneficiary;
 import com.waleed.capstone2.Repository.BeneficiaryRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,25 +22,21 @@ public class BeneficiaryService {
         beneficiaryRepository.save(beneficiary);
     }
 
-    public boolean updateBeneficiary(Integer id, Beneficiary beneficiary) {
-        Beneficiary b = beneficiaryRepository.findById(id).orElse(null);
-        if (b == null) {
-            return false;
-        }
+    public void updateBeneficiary(Integer id, Beneficiary beneficiary) {
+        Beneficiary b = beneficiaryRepository.findById(id)
+                .orElseThrow(() -> new ApiException("Beneficiary not found"));
 
         b.setName(beneficiary.getName());
         b.setEmail(beneficiary.getEmail());
         b.setPassword(beneficiary.getPassword());
         b.setDocumentUrl(beneficiary.getDocumentUrl());
         beneficiaryRepository.save(b);
-        return true;
     }
 
-    public boolean deleteBeneficiary(Integer id) {
+    public void deleteBeneficiary(Integer id) {
         if (!beneficiaryRepository.existsById(id)) {
-            return false;
+            throw new ApiException("Beneficiary not found");
         }
         beneficiaryRepository.deleteById(id);
-        return true;
     }
 }

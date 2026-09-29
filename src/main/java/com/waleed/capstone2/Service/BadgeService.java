@@ -1,5 +1,6 @@
 package com.waleed.capstone2.Service;
 
+import com.waleed.capstone2.Api.ApiException;
 import com.waleed.capstone2.Entity.Badge;
 import com.waleed.capstone2.Repository.BadgeRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +17,11 @@ public class BadgeService {
         return badgeRepository.findAll();
     }
 
-    public boolean deleteBadge(Integer id) {
+    public void deleteBadge(Integer id) {
         if (!badgeRepository.existsById(id)) {
-            return false;
+            throw new ApiException("Badge not found");
         }
         badgeRepository.deleteById(id);
-        return true;
     }
 
     public List<Badge> getBadgesByDonor(Integer donorId) {

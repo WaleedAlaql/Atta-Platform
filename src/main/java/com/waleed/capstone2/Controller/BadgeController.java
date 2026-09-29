@@ -19,10 +19,7 @@ public class BadgeController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteBadge(@PathVariable Integer id) {
-        boolean deleted = badgeService.deleteBadge(id);
-        if (!deleted) {
-            return ResponseEntity.badRequest().body("Badge not found");
-        }
+        badgeService.deleteBadge(id);
         return ResponseEntity.ok("Badge deleted successfully");
     }
 

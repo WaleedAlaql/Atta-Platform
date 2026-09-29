@@ -1,5 +1,6 @@
 package com.waleed.capstone2.Service;
 
+import com.waleed.capstone2.Api.ApiException;
 import com.waleed.capstone2.Entity.Beneficiary;
 import com.waleed.capstone2.Entity.DonationItem;
 import com.waleed.capstone2.Entity.DonationRequest;
@@ -24,99 +25,76 @@ public class DonationRequestService {
         return donationRequestRepository.findAll();
     }
 
-    public String addRequest(DonationRequest request) {
-        // check if the item is in the system
-        DonationItem item = donationItemRepository.findById(request.getItemId()).orElse(null);
-        if (item == null) {
-            return "Item not found";
-        }
+    public void addRequest(DonationRequest request) {
+        DonationItem item = donationItemRepository.findById(request.getItemId())
+                .orElseThrow(() -> new ApiException("Item not found"));
 
-        // check if the beneficiary is in the system
-        Beneficiary beneficiary = beneficiaryRepository.findById(request.getBeneficiaryId()).orElse(null);
-        if (beneficiary == null) {
-            return "Beneficiary not found";
-        }
+        Beneficiary beneficiary = beneficiaryRepository.findById(request.getBeneficiaryId())
+                .orElseThrow(() -> new ApiException("Beneficiary not found"));
 
-        // check if the beneficiary is verified by the admin
         if (!beneficiary.isVerified()) {
-            return "Beneficiary account is not verified by admin yet";
+            throw new ApiException("Beneficiary account is not verified by admin yet");
         }
 
-        // check if the beneficiary has already requested this item
         if (donationRequestRepository.existsByBeneficiaryIdAndItemId(
                 request.getBeneficiaryId(), request.getItemId())) {
-            return "Already requested";
+            throw new ApiException("Already requested");
         }
 
-        // set the request date and status
         request.setRequestDate(LocalDate.now());
         request.setStatus("CREATED");
 
         donationRequestRepository.save(request);
 
-        // send a whatsapp message to the beneficiary
         String message = "Hello " + beneficiary.getName() + ", your donation request for (" + item.getTitle() + ") has been *CREATED* successfully! We will keep you updated as the status changes.";
         whatsAppService.sendWhatsAppMessage(beneficiary.getPhone(), message);
-
-        return "Success";
     }
 
-        // update the request status and send a whatsapp message to the beneficiary
-        public boolean updateRequestStatus(Integer requestId) {
-            DonationRequest request = donationRequestRepository.findById(requestId).orElse(null);
-            if (request == null) {
-                return false;
-            }
+    public void updateRequestStatus(Integer requestId) {
+        DonationRequest request = donationRequestRepository.findById(requestId)
+                .orElseThrow(() -> new ApiException("Request not found"));
 
-            String currentStatus = request.getStatus();
-            String nextStatus;
+        String currentStatus = request.getStatus();
+        String nextStatus;
 
-            if ("CREATED".equalsIgnoreCase(currentStatus)) {
-                nextStatus = "IN_PROGRESS";
-            } else if ("IN_PROGRESS".equalsIgnoreCase(currentStatus)) {
-                nextStatus = "DELIVERED";
-            } else if ("DELIVERED".equalsIgnoreCase(currentStatus)) {
-                return false; // the request is already completed and cannot be changed
-            } else {
-                nextStatus = "CREATED"; // default status for safety
-            }
-
-            request.setStatus(nextStatus);
-            donationRequestRepository.save(request);
-
-            // get the beneficiary's information and send a whatsapp message with the new status
-            DonationItem item = donationItemRepository.findById(request.getItemId()).orElse(null);
-            if (item == null) {
-                return false;
-            }
-            Beneficiary beneficiary = beneficiaryRepository.findById(request.getBeneficiaryId()).orElse(null);
-            if (beneficiary != null && beneficiary.getPhone() != null) {
-                String message = "Hello " + beneficiary.getName() + ", your donation request for item: (" + item.getTitle() + ") status has been updated to: *" + nextStatus + "*.";
-                whatsAppService.sendWhatsAppMessage(beneficiary.getPhone(), message);
-            }
-
-            return true;
+        if ("CREATED".equalsIgnoreCase(currentStatus)) {
+            nextStatus = "IN_PROGRESS";
+        } else if ("IN_PROGRESS".equalsIgnoreCase(currentStatus)) {
+            nextStatus = "DELIVERED";
+        } else if ("DELIVERED".equalsIgnoreCase(currentStatus)) {
+            throw new ApiException("Request already completed");
+        } else {
+            nextStatus = "CREATED";
         }
 
-    public boolean deleteRequest(Integer id) {
-        DonationRequest request = donationRequestRepository.findById(id).orElse(null);
-        if (request == null) {
-            return false;
-        }
+        request.setStatus(nextStatus);
+        donationRequestRepository.save(request);
 
+        DonationItem item = donationItemRepository.findById(request.getItemId())
+                .orElseThrow(() -> new ApiException("Item not found"));
+        Beneficiary beneficiary = beneficiaryRepository.findById(request.getBeneficiaryId()).orElse(null);
+        if (beneficiary != null && beneficiary.getPhone() != null) {
+            String message = "Hello " + beneficiary.getName() + ", your donation request for item: (" + item.getTitle() + ") status has been updated to: *" + nextStatus + "*.";
+            whatsAppService.sendWhatsAppMessage(beneficiary.getPhone(), message);
+        }
+    }
+
+    public void deleteRequest(Integer id) {
+        if (!donationRequestRepository.existsById(id)) {
+            throw new ApiException("Donation request not found");
+        }
         donationRequestRepository.deleteById(id);
-        return true;
     }
 
     public List<DonationRequest> getRequestsByStatus(String status) {
         if (status == null || status.isBlank()) {
-            return null;
+            throw new ApiException("Invalid status. Use CREATED, IN_PROGRESS, or DELIVERED");
         }
         String normalized = status.trim();
         if (!normalized.equalsIgnoreCase("CREATED")
                 && !normalized.equalsIgnoreCase("IN_PROGRESS")
                 && !normalized.equalsIgnoreCase("DELIVERED")) {
-            return null;
+            throw new ApiException("Invalid status. Use CREATED, IN_PROGRESS, or DELIVERED");
         }
         return donationRequestRepository.findByStatusIgnoreCase(normalized);
     }

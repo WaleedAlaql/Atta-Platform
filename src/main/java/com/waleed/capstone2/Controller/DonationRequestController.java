@@ -22,53 +22,25 @@ public class DonationRequestController {
 
     @PostMapping("/add")
     public ResponseEntity<?> addRequest(@Valid @RequestBody DonationRequest request) {
-        String result = donationRequestService.addRequest(request);
-
-        if (result.equals("Item not found")) {
-            return ResponseEntity.status(404).body(new ApiResponse("Donation item not found"));
-        }
-        if (result.equals("Beneficiary not found")) {
-            return ResponseEntity.status(404).body(new ApiResponse("Beneficiary not found"));
-        }
-        if (result.equals("Beneficiary account is not verified by admin yet")) {
-            return ResponseEntity.status(400).body(new ApiResponse("Beneficiary account is not verified by admin yet"));
-        }
-        if (result.equals("Already requested")) {
-            return ResponseEntity.status(409).body(new ApiResponse("You already have a request for this item"));
-        }
-        if (!result.equals("Success")) {
-            return ResponseEntity.status(400).body(new ApiResponse(result));
-        }
-
+        donationRequestService.addRequest(request);
         return ResponseEntity.status(200).body(new ApiResponse("Donation request created successfully and WhatsApp notification sent"));
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteRequest(@PathVariable Integer id) {
-        boolean isDeleted = donationRequestService.deleteRequest(id);
-        if (!isDeleted) {
-            return ResponseEntity.badRequest().body("Donation request not found");
-        }
+        donationRequestService.deleteRequest(id);
         return ResponseEntity.ok("Donation request deleted successfully, and Item status restored.");
     }
 
     @PutMapping("/update-status/{id}")
     public ResponseEntity<?> updateRequestStatus(@PathVariable Integer id) {
-        boolean updated = donationRequestService.updateRequestStatus(id);
-        if (!updated) {
-            return ResponseEntity.badRequest().body("Request not found or already completed");
-        }
+        donationRequestService.updateRequestStatus(id);
         return ResponseEntity.ok("Request status updated successfully to the next stage and notification sent.");
     }
 
     @GetMapping("/status/{status}")
     public ResponseEntity<?> getRequestsByStatus(@PathVariable String status) {
-        var requests = donationRequestService.getRequestsByStatus(status);
-        if (requests == null) {
-            return ResponseEntity.status(400).body(new ApiResponse(
-                    "Invalid status. Use CREATED, IN_PROGRESS, or DELIVERED"));
-        }
-        return ResponseEntity.ok(requests);
+        return ResponseEntity.ok(donationRequestService.getRequestsByStatus(status));
     }
 
     @GetMapping("/count")

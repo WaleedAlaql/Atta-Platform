@@ -24,31 +24,19 @@ public class DonationItemController {
 
     @PostMapping("/add")
     public ResponseEntity<?> addItem(@Valid @RequestBody DonationItem donationItem) {
-        String response = donationItemService.addItem(donationItem);
-
-        // if the donor is not found
-        if (response.equals("Donor not found")) {
-            return ResponseEntity.status(404).body(new ApiResponse("Donor not found with the given ID"));
-        }
-
+        donationItemService.addItem(donationItem);
         return ResponseEntity.status(200).body(new ApiResponse("Item added successfully with direct phone contact"));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse> updateItem(@PathVariable Integer id, @Valid @RequestBody DonationItem donationItem) {
-        boolean updated = donationItemService.updateItem(id, donationItem);
-        if (!updated) {
-            return ResponseEntity.status(400).body(new ApiResponse("Device not found"));
-        }
+        donationItemService.updateItem(id, donationItem);
         return ResponseEntity.status(200).body(new ApiResponse("Device updated successfully"));
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<ApiResponse> deleteItem(@PathVariable Integer id) {
-        boolean deleted = donationItemService.deleteItem(id);
-        if (!deleted) {
-            return ResponseEntity.status(400).body(new ApiResponse("Item not found"));
-        }
+        donationItemService.deleteItem(id);
         return ResponseEntity.status(200).body(new ApiResponse("Item deleted successfully"));
     }
 
@@ -69,10 +57,6 @@ public class DonationItemController {
 
     @GetMapping("/donor/{donorId}")
     public ResponseEntity<?> getItemsByDonor(@PathVariable Integer donorId) {
-        var items = donationItemService.getByDonorId(donorId);
-        if (items == null) {
-            return ResponseEntity.status(404).body(new ApiResponse("Donor not found"));
-        }
-        return ResponseEntity.ok(items);
+        return ResponseEntity.ok(donationItemService.getByDonorId(donorId));
     }
 }

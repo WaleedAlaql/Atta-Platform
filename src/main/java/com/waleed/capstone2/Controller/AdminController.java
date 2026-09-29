@@ -5,9 +5,7 @@ import com.waleed.capstone2.Entity.Badge;
 import com.waleed.capstone2.Service.AdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,32 +21,20 @@ public class AdminController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addAdmin(@Valid @RequestBody Admin admin, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors.getFieldError().getDefaultMessage());
-        }
+    public ResponseEntity<?> addAdmin(@Valid @RequestBody Admin admin) {
         adminService.addAdmin(admin);
         return ResponseEntity.ok("Admin added successfully");
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateAdmin(@PathVariable Integer id, @Valid @RequestBody Admin admin, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors.getFieldError().getDefaultMessage());
-        }
-        boolean isUpdated = adminService.updateAdmin(id, admin);
-        if (!isUpdated){
-            return ResponseEntity.badRequest().body("Admin not found");
-        }
+    public ResponseEntity<?> updateAdmin(@PathVariable Integer id, @Valid @RequestBody Admin admin) {
+        adminService.updateAdmin(id, admin);
         return ResponseEntity.ok("Admin updated successfully");
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteAdmin(@PathVariable Integer id) {
-        boolean isDeleted = adminService.deleteAdmin(id);
-        if (!isDeleted) {
-            return ResponseEntity.badRequest().body("Admin not found");
-        }
+        adminService.deleteAdmin(id);
         return ResponseEntity.ok("Admin deleted successfully");
     }
 
@@ -60,31 +46,13 @@ public class AdminController {
     // verify a beneficiary account
     @PutMapping("/verify-beneficiary/{id}")
     public ResponseEntity<String> verifyBeneficiary(@PathVariable Integer id) {
-        String result = adminService.verifyBeneficiary(id);
-
-        // if the account is not found
-        if (result.equals("Beneficiary not found")) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
-        }
-
-        // if the account is already verified
-        if (result.equals("Beneficiary account is already verified!")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
-
-        // if the account is verified successfully
-        return ResponseEntity.ok(result);
+        adminService.verifyBeneficiary(id);
+        return ResponseEntity.ok("Beneficiary verified successfully");
     }
 
     @PostMapping("/give-badge")
-    public ResponseEntity<?> giveBadge(@Valid @RequestBody Badge badge, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors.getFieldError().getDefaultMessage());
-        }
-        boolean added = adminService.giveBadge(badge);
-        if (!added) {
-            return ResponseEntity.badRequest().body("Donor not found");
-        }
+    public ResponseEntity<?> giveBadge(@Valid @RequestBody Badge badge) {
+        adminService.giveBadge(badge);
         return ResponseEntity.ok("Badge '" + badge.getTitle() + "' awarded to donor successfully");
     }
 }

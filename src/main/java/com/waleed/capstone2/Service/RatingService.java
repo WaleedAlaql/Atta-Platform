@@ -1,5 +1,7 @@
 package com.waleed.capstone2.Service;
 
+import com.waleed.capstone2.Api.ApiException;
+import com.waleed.capstone2.Entity.Donor;
 import com.waleed.capstone2.Entity.Rating;
 import com.waleed.capstone2.Repository.BeneficiaryRepository;
 import com.waleed.capstone2.Repository.DonorRepository;
@@ -20,20 +22,18 @@ public class RatingService {
         return ratingRepository.findAll();
     }
 
-    public boolean addRating(Rating rating) {
+    public void addRating(Rating rating) {
         if (!donorRepository.existsById(rating.getDonorId()) || !beneficiaryRepository.existsById(rating.getBeneficiaryId())) {
-            return false; // check if the donor and beneficiary are in the system
+            throw new ApiException("Donor or Beneficiary not found");
         }
         ratingRepository.save(rating);
-        return true;
     }
 
-    public boolean deleteRating(Integer id) {
+    public void deleteRating(Integer id) {
         if (!ratingRepository.existsById(id)) {
-            return false;
+            throw new ApiException("Rating not found");
         }
         ratingRepository.deleteById(id);
-        return true;
     }
 
     public List<Rating> getRatingsByDonor(Integer donorId) {
@@ -42,5 +42,19 @@ public class RatingService {
 
     public boolean donorExists(Integer donorId) {
         return donorId != null && donorRepository.existsById(donorId);
+    }
+
+    public String donorRatingSummary(Integer donorId) {
+        Donor donor = donorRepository.findById(donorId)
+                .orElseThrow(() -> new ApiException("Donor not found"));
+        List<Rating> ratings = ratingRepository.findByDonorId(donorId);
+        int count = ratings.size();
+        int totalScore = 0;
+        for (Rating rating : ratings) {
+            totalScore += rating.getScore();
+        }
+        double average = count == 0 ? 0.0 : (double) totalScore / count;
+        double averageScore = Math.round(average * 10.0) / 10.0;
+        return donor.getName() + " has " + count + " ratings with average score " + averageScore;
     }
 }

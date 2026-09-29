@@ -1,5 +1,6 @@
 package com.waleed.capstone2.Service;
 
+import com.waleed.capstone2.Api.ApiException;
 import com.waleed.capstone2.Entity.Donor;
 import com.waleed.capstone2.Repository.DonorRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,25 +21,21 @@ public class DonorService {
         donorRepository.save(donor);
     }
 
-    public boolean updateDonor(Integer id, Donor donor) {
-        Donor old = donorRepository.findById(id).orElse(null);
-        if (old == null) {
-            return false;
-        }
+    public void updateDonor(Integer id, Donor donor) {
+        Donor old = donorRepository.findById(id)
+                .orElseThrow(() -> new ApiException("Donor not found"));
 
         old.setName(donor.getName());
         old.setEmail(donor.getEmail());
         old.setPassword(donor.getPassword());
         old.setPhone(donor.getPhone());
         donorRepository.save(old);
-        return true;
     }
 
-    public boolean deleteDonor(Integer id) {
+    public void deleteDonor(Integer id) {
         if (!donorRepository.existsById(id)) {
-            return false;
+            throw new ApiException("Donor not found");
         }
         donorRepository.deleteById(id);
-        return true;
     }
 }

@@ -5,7 +5,6 @@ import com.waleed.capstone2.Service.BeneficiaryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,32 +20,20 @@ public class BeneficiaryController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addBeneficiary(@Valid @RequestBody Beneficiary beneficiary, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors.getFieldError().getDefaultMessage());
-        }
+    public ResponseEntity<?> addBeneficiary(@Valid @RequestBody Beneficiary beneficiary) {
         beneficiaryService.addBeneficiary(beneficiary);
         return ResponseEntity.ok("Beneficiary registered successfully and pending verification");
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateBeneficiary(@PathVariable Integer id, @Valid @RequestBody Beneficiary beneficiary, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors.getFieldError().getDefaultMessage());
-        }
-        boolean updated = beneficiaryService.updateBeneficiary(id, beneficiary);
-        if (!updated) {
-            return ResponseEntity.badRequest().body("Beneficiary not found");
-        }
+    public ResponseEntity<?> updateBeneficiary(@PathVariable Integer id, @Valid @RequestBody Beneficiary beneficiary) {
+        beneficiaryService.updateBeneficiary(id, beneficiary);
         return ResponseEntity.ok("Beneficiary updated successfully");
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteBeneficiary(@PathVariable Integer id) {
-        boolean isDeleted = beneficiaryService.deleteBeneficiary(id);
-        if (!isDeleted) {
-            return ResponseEntity.badRequest().body("Beneficiary not found");
-        }
+        beneficiaryService.deleteBeneficiary(id);
         return ResponseEntity.ok("Beneficiary deleted successfully");
     }
 }

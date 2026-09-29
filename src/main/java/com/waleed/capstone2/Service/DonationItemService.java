@@ -1,5 +1,6 @@
 package com.waleed.capstone2.Service;
 
+import com.waleed.capstone2.Api.ApiException;
 import com.waleed.capstone2.Entity.DonationItem;
 import com.waleed.capstone2.Entity.Donor;
 import com.waleed.capstone2.Repository.DonationItemRepository;
@@ -22,26 +23,17 @@ public class DonationItemService {
         return donationItemRepository.findAll();
     }
 
-    public String addItem(DonationItem item) {
-        // check if the donor is in the system
-        Donor donor = donorRepository.findById(item.getDonorId()).orElse(null);
-        if (donor == null) {
-            return "Donor not found";
-        }
+    public void addItem(DonationItem item) {
+        Donor donor = donorRepository.findById(item.getDonorId())
+                .orElseThrow(() -> new ApiException("Donor not found"));
 
-        // get the donor's phone number and set it to the item
         item.setDonorPhone(donor.getPhone());
-
-        // save the item
         donationItemRepository.save(item);
-        return "Donation item added successfully!";
     }
 
-    public boolean updateItem(Integer id, DonationItem donationItem) {
-        DonationItem oldDevice = donationItemRepository.findById(id).orElse(null);
-        if (oldDevice == null) {
-            return false;
-        }
+    public void updateItem(Integer id, DonationItem donationItem) {
+        DonationItem oldDevice = donationItemRepository.findById(id)
+                .orElseThrow(() -> new ApiException("Device not found"));
 
         oldDevice.setTitle(donationItem.getTitle());
         oldDevice.setDescription(donationItem.getDescription());
@@ -51,16 +43,12 @@ public class DonationItemService {
         oldDevice.setDonorPhone(donationItem.getDonorPhone());
 
         donationItemRepository.save(oldDevice);
-        return true;
     }
 
-    public boolean deleteItem(Integer id) {
-        DonationItem device = donationItemRepository.findById(id).orElse(null);
-        if (device == null) {
-            return false;
-        }
+    public void deleteItem(Integer id) {
+        DonationItem device = donationItemRepository.findById(id)
+                .orElseThrow(() -> new ApiException("Item not found"));
         donationItemRepository.delete(device);
-        return true;
     }
 
     public DonationItem findById(Integer id) {
@@ -80,7 +68,7 @@ public class DonationItemService {
 
     public List<DonationItem> getByDonorId(Integer donorId) {
         if (donorId == null || !donorRepository.existsById(donorId)) {
-            return null;
+            throw new ApiException("Donor not found");
         }
         return donationItemRepository.findByDonorId(donorId);
     }

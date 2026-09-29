@@ -1,5 +1,6 @@
 package com.waleed.capstone2.Service;
 
+import com.waleed.capstone2.Api.ApiException;
 import com.waleed.capstone2.Entity.Admin;
 import com.waleed.capstone2.Entity.Badge;
 import com.waleed.capstone2.Entity.Beneficiary;
@@ -29,49 +30,38 @@ public class AdminService {
         adminRepository.save(admin);
     }
 
-    public boolean updateAdmin(Integer id, Admin admin) {
-        Admin old = adminRepository.findById(id).orElse(null);
-        if (old == null) {
-            return false;
-        }
+    public void updateAdmin(Integer id, Admin admin) {
+        Admin old = adminRepository.findById(id)
+                .orElseThrow(() -> new ApiException("Admin not found"));
 
         old.setName(admin.getName());
         old.setEmail(admin.getEmail());
         old.setPassword(admin.getPassword());
         adminRepository.save(old);
-        return true;
     }
 
-    public boolean deleteAdmin(Integer id) {
+    public void deleteAdmin(Integer id) {
         if (!adminRepository.existsById(id)) {
-            return false;
+            throw new ApiException("Admin not found");
         }
         adminRepository.deleteById(id);
-        return true;
     }
 
     public List<Beneficiary> getUnverifiedBeneficiaries() {
         return beneficiaryRepository.findByIsVerifiedFalse();
     }
 
-    // verify a beneficiary account
-    public String verifyBeneficiary(Integer beneficiaryId) {
-        Beneficiary beneficiary = beneficiaryRepository.findById(beneficiaryId).orElse(null);
+    public void verifyBeneficiary(Integer beneficiaryId) {
+        Beneficiary beneficiary = beneficiaryRepository.findById(beneficiaryId)
+                .orElseThrow(() -> new ApiException("Beneficiary not found"));
 
-        if (beneficiary == null) {
-            return "Beneficiary not found";
-        }
-
-        // check if the account is already verified
         if (beneficiary.isVerified()) {
-            return "Beneficiary account is already verified!";
+            throw new ApiException("Beneficiary account is already verified!");
         }
 
-        // verify the account and save it
         beneficiary.setVerified(true);
         beneficiaryRepository.save(beneficiary);
 
-        // send an email to the beneficiary
         if (beneficiary.getEmail() != null) {
             String subject = "Account Verified Successfully";
             String message = "Dear " + beneficiary.getName() + ",\n\n" +
@@ -82,15 +72,12 @@ public class AdminService {
 
             emailService.sendEmail(beneficiary.getEmail(), subject, message);
         }
-
-        return "Beneficiary verified successfully";
     }
 
-    public boolean giveBadge(Badge badge) {
+    public void giveBadge(Badge badge) {
         if (badge == null || badge.getDonorId() == null || !donorRepository.existsById(badge.getDonorId())) {
-            return false;
+            throw new ApiException("Donor not found");
         }
         badgeRepository.save(badge);
-        return true;
     }
 }

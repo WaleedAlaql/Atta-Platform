@@ -6,9 +6,7 @@ import com.waleed.capstone2.Service.RatingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/rating")
@@ -23,23 +21,14 @@ public class RatingController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addRating(@Valid @RequestBody Rating rating, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors.getFieldError().getDefaultMessage());
-        }
-        boolean added = ratingService.addRating(rating);
-        if (!added) {
-            return ResponseEntity.badRequest().body("Donor or Beneficiary not found");
-        }
+    public ResponseEntity<?> addRating(@Valid @RequestBody Rating rating) {
+        ratingService.addRating(rating);
         return ResponseEntity.ok("Rating added successfully");
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteRating(@PathVariable Integer id) {
-        boolean deleted = ratingService.deleteRating(id);
-        if (!deleted) {
-            return ResponseEntity.badRequest().body("Rating not found");
-        }
+        ratingService.deleteRating(id);
         return ResponseEntity.ok("Rating deleted successfully");
     }
 
@@ -50,18 +39,7 @@ public class RatingController {
 
     @GetMapping("/donor/{donorId}/summary")
     public ResponseEntity<?> getDonorRatingSummary(@PathVariable Integer donorId) {
-        if (!ratingService.donorExists(donorId)) {
-            return ResponseEntity.status(404).body(new ApiResponse("Donor not found"));
-        }
-        List<Rating> ratings = ratingService.getRatingsByDonor(donorId);
-        int count = ratings.size();
-        int totalScore = 0;
-        for (Rating rating : ratings) {
-            totalScore += rating.getScore();
-        }
-        double average = count == 0 ? 0.0 : (double) totalScore / count;
-        double averageScore = Math.round(average * 10.0) / 10.0;
-        String message = "Donor " + donorId + " has " + count + " ratings with average score " + averageScore;
+        String message = ratingService.donorRatingSummary(donorId);
         return ResponseEntity.ok(new ApiResponse(message));
     }
 }
